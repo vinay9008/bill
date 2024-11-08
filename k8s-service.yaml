@@ -1,0 +1,13 @@
+# k8s-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: supermart-billing-service
+spec:
+  selector:
+    app: supermart-billing
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer  # Use NodePort for local clusters, LoadBalancer for cloud providers

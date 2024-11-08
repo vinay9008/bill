@@ -1,0 +1,22 @@
+# k8s-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supermart-billing-deployment
+  labels:
+    app: supermart-billing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: supermart-billing
+  template:
+    metadata:
+      labels:
+        app: supermart-billing
+    spec:
+      containers:
+        - name: supermart-billing
+          image: your-docker-repo/supermart-billing:latest
+          ports:
+            - containerPort: 80
