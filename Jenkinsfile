@@ -9,7 +9,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Corrected repository URL
-                git 'https://github.com/vinay9008/billing.git'
+               git branch: 'main', url: 'https://github.com/vinay9008/billing.git'
+
             }
         }
 
