@@ -1,45 +1,48 @@
-// Jenkinsfile
 pipeline {
-    agent any
+    agent any  // Use any available agent or executor
 
     environment {
-        DOCKER_REPO = 'your-docker-repo/supermart-billing'  // Replace with your DockerHub repo
-        K8S_DEPLOYMENT = 'supermart-billing-deployment'
-        K8S_NAMESPACE = 'default'
+        DEPLOY_ENV = 'staging'  // Define the deployment environment
     }
 
     stages {
-        stage('Build Docker Image') {
+        stage('Checkout') {
             steps {
-                script {
-                    sh 'docker build -t $DOCKER_REPO:$BUILD_NUMBER .'
-                }
+                // Clone the repository
+                git 'https://github.com/your-repo.git'
             }
         }
 
-        stage('Push to Docker Registry') {
+        stage('Build') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    script {
-                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                        sh 'docker push $DOCKER_REPO:$BUILD_NUMBER'
-                    }
-                }
+                // Print a message or run actual build commands here
+                sh 'echo "Building application..."'
+                // Replace the line above with actual build commands, like `mvn clean install` for Maven
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Test') {
             steps {
-                script {
-                    sh 'kubectl set image deployment/$K8S_DEPLOYMENT supermart-billing=$DOCKER_REPO:$BUILD_NUMBER -n $K8S_NAMESPACE'
-                }
+                // Print a message or run testing commands here
+                sh 'echo "Running tests..."'
+                // Replace this with commands for running unit tests, e.g., `mvn test`
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Deploy the application
+                sh 'echo "Deploying to ${DEPLOY_ENV} environment..."'
+                // Include commands to deploy, like `scp` for file transfer or remote deployment scripts
             }
         }
     }
 
     post {
         always {
-            cleanWs()
+            // Clean up workspace after the pipeline completes
+            echo 'Cleaning up...'
+            deleteDir()
         }
     }
 }
