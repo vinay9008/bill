@@ -1,46 +1,42 @@
 pipeline {
-    agent any  // Use any available agent or executor
+    agent any
 
     environment {
-        DEPLOY_ENV = 'staging'  // Define the deployment environment
+        DEPLOY_ENV = 'staging'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Clone the repository
-                git 'https://github.com/your-repo.git'
+                // Corrected repository URL
+                git 'https://github.com/vinay9008/billing.git'
             }
         }
 
         stage('Build') {
             steps {
-                // Print a message or run actual build commands here
                 sh 'echo "Building application..."'
-                // Replace the line above with actual build commands, like `mvn clean install` for Maven
+                // Replace with actual build commands, e.g., 'mvn clean install'
             }
         }
 
         stage('Test') {
             steps {
-                // Print a message or run testing commands here
                 sh 'echo "Running tests..."'
-                // Replace this with commands for running unit tests, e.g., `mvn test`
+                // Replace with actual testing commands, e.g., 'mvn test'
             }
         }
 
         stage('Deploy') {
             steps {
-                // Deploy the application
                 sh 'echo "Deploying to ${DEPLOY_ENV} environment..."'
-                // Include commands to deploy, like `scp` for file transfer or remote deployment scripts
+                // Add actual deployment commands, like scp or remote deployment scripts
             }
         }
     }
 
     post {
         always {
-            // Clean up workspace after the pipeline completes
             echo 'Cleaning up...'
             deleteDir()
         }
