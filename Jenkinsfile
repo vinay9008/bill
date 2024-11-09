@@ -26,8 +26,8 @@ pipeline {
                 }
             }
         }
+    } // Closing the stages block
 
-      
     post {
         always {
             cleanWs()
