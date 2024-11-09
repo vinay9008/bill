@@ -1,45 +1,31 @@
 pipeline {
     agent any
-
     environment {
-        DEPLOY_ENV = 'staging'
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKER_IMAGE = "your-dockerhub-username/react-jenkins-docker-k8s"
     }
-
     stages {
         stage('Checkout') {
             steps {
-                // Corrected repository URL
-               git branch: 'main', url: 'https://github.com/vinay9008/billing.git'
-
+                git branch: 'main', url: 'https://github.com/vinay9008/billing.git'
             }
         }
-
         stage('Build') {
             steps {
-                sh 'echo "Building application..."'
-                // Replace with actual build commands, e.g., 'mvn clean install'
+                script {
+                    docker.build(DOCKER_IMAGE)
+                }
             }
         }
-
-        stage('Test') {
+        stage('Push to Docker Hub') {
             steps {
-                sh 'echo "Running tests..."'
-                // Replace with actual testing commands, e.g., 'mvn test'
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKER_HUB_CREDENTIALS') {
+                        docker.image(DOCKER_IMAGE).push("latest")
+                    }
+                }
             }
         }
-
-        stage('Deploy') {
-            steps {
-                sh 'echo "Deploying to ${DEPLOY_ENV} environment..."'
-                // Add actual deployment commands, like scp or remote deployment scripts
-            }
-        }
-    }
-
-    post {
-        always {
-            echo 'Cleaning up...'
-            deleteDir()
-        }
+       
     }
 }
