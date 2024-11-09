@@ -1,39 +1,31 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_REPO = 'your-docker-repo/supermart-billing'  // Replace with your DockerHub repo
-        K8S_DEPLOYMENT = 'supermart-billing-deployment'
-        K8S_NAMESPACE = 'default'
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKER_IMAGE = "your-dockerhub-username/react-jenkins-docker-k8s"
     }
-
     stages {
-        stage('Build Docker Image') {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-username/react-jenkins-docker-k8s.git'
+            }
+        }
+        stage('Build') {
             steps {
                 script {
-                    // Build Docker image
-                    sh 'docker build -t $DOCKER_REPO:$BUILD_NUMBER . || exit 1'
+                    docker.build(DOCKER_IMAGE)
                 }
             }
         }
-
-        stage('Push to Docker Registry') {
+        stage('Push to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-credentials-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    script {
-                        // Docker login and push
-                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin || exit 1'
-                        sh 'docker push $DOCKER_REPO:$BUILD_NUMBER || exit 1'
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKER_HUB_CREDENTIALS') {
+                        docker.image(DOCKER_IMAGE).push("latest")
                     }
                 }
             }
         }
-
-        // Optional: Deploy to Kubernetes (assuming you have `kubectl` set up in your Jenkins agent)
         
-    post {
-        always {
-            cleanWs()  // Clean workspace after build
-        }
     }
 }
