@@ -1,31 +1,36 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
-        DOCKER_IMAGE = "your-dockerhub-username/react-jenkins-docker-k8s"
+        DOCKER_REPO = 'your-docker-repo/supermart-billing'  // Replace with your DockerHub repo
+        K8S_DEPLOYMENT = 'supermart-billing-deployment'
+        K8S_NAMESPACE = 'default'
     }
+
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/your-username/react-jenkins-docker-k8s.git'
-            }
-        }
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build(DOCKER_IMAGE)
+                    sh 'docker build -t $DOCKER_REPO:$BUILD_NUMBER .'
                 }
             }
         }
-        stage('Push to Docker Hub') {
+
+        stage('Push to Docker Registry') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKER_HUB_CREDENTIALS') {
-                        docker.image(DOCKER_IMAGE).push("latest")
+                withCredentials([usernamePassword(credentialsId: '123', usernameVariable: 'vinay12345678', passwordVariable: 'Vinay@123')]) {
+                    script {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                        sh 'docker push $DOCKER_REPO:$BUILD_NUMBER'
                     }
                 }
             }
         }
-        
+
+      
+    post {
+        always {
+            cleanWs()
+        }
     }
 }
